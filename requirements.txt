@@ -4,3 +4,7 @@ transformers
 stable-baselines3
 numpy
 pytest
+gym
+matplotlib
+pandas
+asyncio
