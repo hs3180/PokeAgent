@@ -1,0 +1,38 @@
+{
+  "battle_format": "gen8randombattle",
+  "agents": {
+    "rl_agent": {
+      "learning_rate": 0.001,
+      "epsilon": 0.1,
+      "state_size": 100,
+      "action_size": 50,
+      "batch_size": 32,
+      "memory_size": 10000,
+      "gamma": 0.99
+    },
+    "llm_agent": {
+      "model_name": "microsoft/DialoGPT-medium",
+      "temperature": 0.7,
+      "max_length": 100
+    }
+  },
+  "training": {
+    "episodes": 1000,
+    "episodes_per_eval": 50,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.01,
+    "epsilon_decay": 0.995,
+    "target_update_freq": 100,
+    "save_freq": 200
+  },
+  "evaluation": {
+    "num_battles": 50,
+    "opponents": ["random", "rl"],
+    "generate_plots": true
+  },
+  "logging": {
+    "level": "INFO",
+    "save_battles": true,
+    "log_dir": "logs"
+  }
+}
