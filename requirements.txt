@@ -4,7 +4,7 @@ transformers
 stable-baselines3
 numpy
 pytest
-gym
+gym>=0.26.0
 matplotlib
 pandas
 asyncio
