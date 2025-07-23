@@ -14,8 +14,8 @@ class ShowdownAgent(BaseAgent):
     def __init__(self, 
                  username: str,
                  password: Optional[str] = None,
-                 server_url: str = "sim.smogon.com",
-                 server_port: int = 8000,
+                 server_url: str = None,
+                 server_port: int = None,
                  battle_format: str = "gen8randombattle",
                  log_level: int = logging.INFO,
                  **kwargs):
@@ -30,6 +30,8 @@ class ShowdownAgent(BaseAgent):
             battle_format: 对战格式
             log_level: 日志级别
         """
+        if not server_url or not server_port:
+            raise ValueError("You must specify both server_url and server_port for Showdown server.")
         super().__init__(battle_format=battle_format, log_level=log_level, **kwargs)
         self.username = username
         self.password = password

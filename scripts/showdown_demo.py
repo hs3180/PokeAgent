@@ -25,6 +25,14 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Showdown Agent Demo")
+    parser.add_argument('--server-url', type=str, required=True, help='Showdown服务器地址')
+    parser.add_argument('--server-port', type=int, required=True, help='Showdown服务器端口')
+    return parser.parse_args()
+
+args = parse_args()
+
 async def demo_rl_agent_on_showdown():
     """
     演示RL Agent在Showdown上的使用
@@ -35,8 +43,8 @@ async def demo_rl_agent_on_showdown():
     username = "RL_Agent_Demo"
     agent = ShowdownRLAgent(
         username=username,
-        server_url="sim.smogon.com",
-        server_port=8000,
+        server_url=args.server_url,
+        server_port=args.server_port,
         battle_format="gen8randombattle"
     )
     
@@ -72,8 +80,8 @@ async def demo_llm_agent_on_showdown():
     agent = ShowdownLLMAgent(
         username=username,
         model_name="microsoft/DialoGPT-medium",
-        server_url="sim.smogon.com",
-        server_port=8000,
+        server_url=args.server_url,
+        server_port=args.server_port,
         battle_format="gen8randombattle"
     )
     

@@ -14,8 +14,8 @@ class ShowdownRLAgent(ShowdownAgent):
                  rl_agent: Optional[RLAgent] = None,
                  model_path: Optional[str] = None,
                  password: Optional[str] = None,
-                 server_url: str = "sim.smogon.com",
-                 server_port: int = 8000,
+                 server_url: str = None,
+                 server_port: int = None,
                  battle_format: str = "gen8randombattle",
                  log_level: int = logging.INFO,
                  **kwargs):
@@ -32,6 +32,8 @@ class ShowdownRLAgent(ShowdownAgent):
             battle_format: 对战格式
             log_level: 日志级别
         """
+        if not server_url or not server_port:
+            raise ValueError("You must specify both server_url and server_port for Showdown server.")
         super().__init__(
             username=username,
             password=password,
