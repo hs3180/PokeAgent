@@ -47,20 +47,7 @@ class PokemonBattleAI:
             with open(config_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         else:
-            # 默认配置
-            return {
-                'battle_format': 'gen8randombattle',
-                'agents': {
-                    'rl_agent': {
-                        'learning_rate': 0.001,
-                        'epsilon': 0.1
-                    },
-                    'llm_agent': {
-                        'model_name': 'microsoft/DialoGPT-medium',
-                        'temperature': 0.7
-                    }
-                }
-            }
+            raise FileNotFoundError(f"配置文件 {config_path} 不存在，请先创建配置文件后再运行。")
     
     def create_agent(self, agent_type: str, **kwargs) -> BaseAgent:
         """

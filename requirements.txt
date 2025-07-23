@@ -2,7 +2,7 @@ poke-env
 torch
 transformers
 stable-baselines3
-numpy
+numpy<2
 pytest
 gym>=0.26.0
 matplotlib
