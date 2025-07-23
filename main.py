@@ -219,8 +219,8 @@ async def main():
     parser.add_argument('--mode', type=str, required=True,
                        choices=['train', 'run', 'evaluate', 'tournament', 'interactive'],
                        help='运行模式')
-    parser.add_argument('--config', type=str, help='配置文件路径')
-    parser.add_argument('--agent-type', type=str, default='rl',
+    parser.add_argument('--config', type=str, default="config/showdown_config.json", help='配置文件路径')
+    parser.add_argument('--agent-type', type=str, required=True,
                        choices=['rl', 'llm', 'random'],
                        help='Agent类型')
     parser.add_argument('--opponent-type', type=str, default='random',
@@ -233,6 +233,11 @@ async def main():
     
     args = parser.parse_args()
     
+    # 检查配置文件是否存在
+    if not os.path.exists(args.config):
+        print(f"配置文件 {args.config} 不存在，请先创建配置文件后再运行。", file=sys.stderr)
+        sys.exit(1)
+
     # 创建主程序实例
     ai = PokemonBattleAI(args.config)
     
