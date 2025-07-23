@@ -42,11 +42,11 @@ class ShowdownManager:
             logging.info(f"成功加载配置文件: {self.config_path}")
             return config
         except FileNotFoundError:
-            logging.warning(f"配置文件 {self.config_path} 不存在，使用默认配置")
-            return self._get_default_config()
+            logging.error(f"配置文件 {self.config_path} 不存在，请创建配置文件后再运行。")
+            raise FileNotFoundError(f"配置文件 {self.config_path} 不存在，请创建配置文件后再运行。")
         except json.JSONDecodeError as e:
             logging.error(f"配置文件格式错误: {e}")
-            return self._get_default_config()
+            raise
     
     def _get_default_config(self) -> Dict[str, Any]:
         """
