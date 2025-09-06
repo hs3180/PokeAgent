@@ -13,6 +13,43 @@ python simple_gen1ou_client.py
 pip install -r requirements.txt
 ```
 
+### Environment Configuration
+
+The application supports authentication and configuration through environment variables. You can set these directly or use a `.env` file.
+
+#### Required Environment Variables
+- `POKEAGENT_USERNAME`: Your Pokemon Showdown username
+- `POKEAGENT_SERVER_URL`: Showdown server URL (e.g., `play.pokemonshowdown.com`)
+- `POKEAGENT_SERVER_PORT`: Showdown server port (e.g., `443`)
+
+#### Optional Environment Variables
+- `POKEAGENT_PASSWORD`: Your Pokemon Showdown password (for registered accounts)
+- `POKEAGENT_BATTLE_FORMAT`: Battle format (default: `gen1ou`)
+- `POKEAGENT_LOG_LEVEL`: Log level (DEBUG, INFO, WARNING, ERROR)
+
+#### Using .env Files
+1. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+2. Edit `.env` with your credentials:
+   ```
+   POKEAGENT_USERNAME=your_username
+   POKEAGENT_PASSWORD=your_password
+   POKEAGENT_SERVER_URL=play.pokemonshowdown.com
+   POKEAGENT_SERVER_PORT=443
+   ```
+3. Run the application - it will automatically load the `.env` file
+
+#### Setting Environment Variables Directly
+```bash
+export POKEAGENT_USERNAME=your_username
+export POKEAGENT_SERVER_URL=play.pokemonshowdown.com
+export POKEAGENT_SERVER_PORT=443
+export POKEAGENT_PASSWORD=your_password
+python simple_gen1ou_client.py
+```
+
 ## Architecture Overview
 
 ### Core Architecture
