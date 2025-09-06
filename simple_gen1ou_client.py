@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-简化的Gen1 OU天梯对战客户端
-连接天梯进行一场Gen1OU比赛
+Simplified Gen1 OU ladder battle client
+Connects to ladder for a single Gen1OU battle
 """
 
 import asyncio
 import logging
 import sys
-import os
 import time
 from pathlib import Path
 
@@ -21,13 +20,13 @@ logger = logging.getLogger(__name__)
 
 async def run_single_gen1ou_battle():
     """
-    连接天梯进行一场Gen1OU比赛
+    Connect to ladder for a single Gen1OU battle
     """
-    logger.info("=== Gen1 OU 天梯对战 ===")
+    logger.info("=== Gen1 OU Ladder Battle ===")
     
-    # 创建Showdown Agent
+    # Create Showdown Agent
     agent = ShowdownAgent(
-        username=f"Gen1OU_{int(time.time())}",  # 时间戳用户名避免冲突
+        username=f"Gen1OU_{int(time.time())}",  # Timestamp username to avoid conflicts
         password=None,
         server_url="play.pokemonshowdown.com",
         server_port=443,
@@ -35,45 +34,45 @@ async def run_single_gen1ou_battle():
     )
     
     try:
-        # 连接服务器
-        logger.info("连接到Showdown服务器...")
+        # Connect to server
+        logger.info("Connecting to Showdown server...")
         await agent.connect()
-        logger.info(f"已连接，用户名: {agent.username}")
-        logger.info("对战格式: Gen1 OU")
+        logger.info(f"Connected, username: {agent.username}")
+        logger.info("Battle format: Gen1 OU")
         
-        # 加入天梯
-        logger.info("加入Gen1 OU天梯...")
+        # Join ladder
+        logger.info("Joining Gen1 OU ladder...")
         await agent.join_ladder("gen1ou")
         
-        # 等待对战开始
-        logger.info("等待对手...")
+        # Wait for battle to start
+        logger.info("Waiting for opponent...")
         start_time = time.time()
-        while not agent.client.battles and (time.time() - start_time) < 120:
+        while not agent.battles and (time.time() - start_time) < 120:
             await asyncio.sleep(1)
         
-        if not agent.client.battles:
-            logger.error("120秒内未找到对手")
+        if not agent.battles:
+            logger.error("No opponent found within 120 seconds")
             return
         
-        # 进行对战
-        logger.info("对战开始！")
-        battle_id = list(agent.client.battles.keys())[0]
-        battle = agent.client.battles[battle_id]
+        # Conduct battle
+        logger.info("Battle started!")
+        battle_id = list(agent.battles.keys())[0]
+        battle = agent.battles[battle_id]
         
         await battle.wait_until_finished()
         
-        # 显示结果
-        result = "胜利" if battle.won else "失败"
-        logger.info(f"对战结束: {result}")
+        # Show result
+        result = "Victory" if battle.won else "Defeat"
+        logger.info(f"Battle finished: {result}")
         
-        # 获取统计信息
+        # Get statistics
         stats = agent.get_battle_stats()
-        logger.info(f"统计 - 胜: {stats['wins']}, 负: {stats['losses']}")
+        logger.info(f"Stats - Wins: {stats['wins']}, Losses: {stats['losses']}")
         
     except Exception as e:
-        logger.error(f"对战出错: {e}")
+        logger.error(f"Battle error: {e}")
     finally:
-        # 离开天梯并断开连接
+        # Leave ladder and disconnect
         try:
             await agent.leave_ladder()
         except:
@@ -82,8 +81,8 @@ async def run_single_gen1ou_battle():
             await agent.disconnect()
         except:
             pass
-        logger.info("=== 对战结束 ===")
+        logger.info("=== Battle ended ===")
 
 if __name__ == "__main__":
-    # 运行单场Gen1OU天梯对战
+    # Run single Gen1OU ladder battle
     asyncio.run(run_single_gen1ou_battle())
