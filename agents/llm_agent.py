@@ -1,7 +1,7 @@
 from .base_agent import BaseAgent
 from poke_env.battle import Battle
 from poke_env.player import Player
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelWithLMHead
 import torch
 from typing import Dict, Any, List, Optional
 import json
@@ -28,7 +28,7 @@ class LLMAgent(BaseAgent):
         # 初始化模型和tokenizer
         try:
             self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-            self.model = AutoModelForCausalLM.from_pretrained(model_name)
+            self.model = AutoModelWithLMHead.from_pretrained(model_name)
             self.tokenizer.pad_token = self.tokenizer.eos_token
         except Exception as e:
             logging.warning(f"Failed to load model {model_name}: {e}")
@@ -210,7 +210,7 @@ class LLMAgent(BaseAgent):
         try:
             self.model_name = model_name
             self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-            self.model = AutoModelForCausalLM.from_pretrained(model_name)
+            self.model = AutoModelWithLMHead.from_pretrained(model_name)
             self.tokenizer.pad_token = self.tokenizer.eos_token
             logging.info(f"成功更新模型为: {model_name}")
         except Exception as e:

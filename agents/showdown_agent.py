@@ -3,6 +3,8 @@ import logging
 from typing import Optional, Dict, Any
 from poke_env.player import Player
 from poke_env.ps_client import PSClient
+from poke_env.ps_client.account_configuration import AccountConfiguration
+from poke_env.ps_client.server_configuration import ServerConfiguration
 from poke_env.battle import Battle
 from .base_agent import BaseAgent
 
@@ -32,29 +34,52 @@ class ShowdownAgent(BaseAgent):
         """
         if not server_url or not server_port:
             raise ValueError("You must specify both server_url and server_port for Showdown server.")
+        self._log_level = log_level
         super().__init__(battle_format=battle_format, log_level=log_level, **kwargs)
-        self.username = username
-        self.password = password
+        self._username = username
+        self._password = password
         self.server_url = server_url
         self.server_port = server_port
         self.client: Optional[PSClient] = None
         self.is_connected = False
+    
+    @property
+    def username(self):
+        return self._username
+        
+    @property 
+    def password(self):
+        return self._password
+        
+    @property
+    def log_level(self):
+        return self._log_level
         
     async def connect(self):
         """
         连接到Showdown服务器
         """
         try:
+            # 创建账户配置
+            account_config = AccountConfiguration(self.username, self.password)
+            
+            # 创建服务器配置
+            websocket_url = f"wss://{self.server_url}:{self.server_port}/showdown/websocket"
+            auth_url = f"https://{self.server_url}:{self.server_port}"
+            server_config = ServerConfiguration(
+                websocket_url=websocket_url,
+                authentication_url=auth_url
+            )
+            
+            # 创建PSClient
             self.client = PSClient(
-                username=self.username,
-                password=self.password,
-                server_url=self.server_url,
-                server_port=self.server_port,
+                account_configuration=account_config,
+                server_configuration=server_config,
                 log_level=self.log_level
             )
             
-            # 连接到服务器
-            await self.client.connect()
+            # 开始监听（会自动处理登录）
+            await self.client.listen()
             self.is_connected = True
             logging.info(f"成功连接到Showdown服务器: {self.server_url}:{self.server_port}")
             
@@ -68,7 +93,7 @@ class ShowdownAgent(BaseAgent):
         断开与Showdown服务器的连接
         """
         if self.client and self.is_connected:
-            await self.client.disconnect()
+            await self.client.stop_listening()
             self.is_connected = False
             logging.info("已断开与Showdown服务器的连接")
     
@@ -112,8 +137,8 @@ class ShowdownAgent(BaseAgent):
             raise RuntimeError("未连接到Showdown服务器")
         
         format_to_use = battle_format or self.battle_format
-        await self.client.join_ladder(format_to_use)
-        logging.info(f"已加入 {format_to_use} 天梯对战")
+        await self.client.search_ladder_game(format_to_use, None)
+        logging.info(f"已开始搜索 {format_to_use} 天梯对战")
     
     async def leave_ladder(self):
         """
@@ -122,8 +147,9 @@ class ShowdownAgent(BaseAgent):
         if not self.is_connected:
             raise RuntimeError("未连接到Showdown服务器")
         
-        await self.client.leave_ladder()
-        logging.info("已离开天梯对战")
+        # 发送取消搜索的消息
+        await self.client.send_message("/cancelsearch")
+        logging.info("已取消天梯对战搜索")
     
     async def run_battles(self, num_battles: int = 1, battle_format: Optional[str] = None):
         """
