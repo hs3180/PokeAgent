@@ -22,9 +22,9 @@ from agents.llm_agent import LLMAgent
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-async def run_single_gen1ou_battle():
+async def run_single_gen1ou_battle(num_battles=1):
     """
-    Connect to ladder for a single Gen1OU battle
+    Connect to ladder for multiple Gen1OU battles
     """
     logger.info("=== Gen1 OU Ladder Battle ===")
     
@@ -116,34 +116,47 @@ Ability: Chlorophyll
         logger.info(f"Connected, username: {agent.username}")
         logger.info("Battle format: Gen1 OU")
         
-        # Join ladder
-        logger.info("Joining Gen1 OU ladder...")
-        await agent.join_ladder("gen1ou")
+        # Join ladder for multiple battles
+        logger.info(f"Joining Gen1 OU ladder for {num_battles} battles...")
+        battles_completed = 0
         
-        # Wait for battle to start
-        logger.info("Waiting for opponent...")
-        start_time = time.time()
-        while not agent.battles and (time.time() - start_time) < 120:
-            await asyncio.sleep(1)
+        while battles_completed < num_battles:
+            # Join ladder and wait for opponent
+            await agent.join_ladder("gen1ou")
+            
+            logger.info("Waiting for opponent...")
+            start_time = time.time()
+            while not agent.battles and (time.time() - start_time) < 120:
+                await asyncio.sleep(1)
+            
+            if not agent.battles:
+                logger.error("No opponent found within 120 seconds")
+                break
+            
+            # Conduct battle
+            logger.info(f"Battle {battles_completed + 1} started!")
+            battle_id = list(agent.battles.keys())[0]
+            battle = agent.battles[battle_id]
+            
+            await battle.wait_until_finished()
+            
+            # Show result
+            result = "Victory" if battle.won else "Defeat"
+            logger.info(f"Battle {battles_completed + 1} finished: {result}")
+            
+            battles_completed += 1
+            
+            # Short break between battles
+            if battles_completed < num_battles:
+                logger.info("Taking a short break before next battle...")
+                await asyncio.sleep(3)
         
-        if not agent.battles:
-            logger.error("No opponent found within 120 seconds")
-            return
-        
-        # Conduct battle
-        logger.info("Battle started!")
-        battle_id = list(agent.battles.keys())[0]
-        battle = agent.battles[battle_id]
-        
-        await battle.wait_until_finished()
-        
-        # Show result
-        result = "Victory" if battle.won else "Defeat"
-        logger.info(f"Battle finished: {result}")
-        
-        # Get statistics
+        # Get final statistics
         stats = agent.get_battle_stats()
-        logger.info(f"Stats - Wins: {stats['wins']}, Losses: {stats['losses']}")
+        logger.info(f"=== Final Stats ===")
+        logger.info(f"Battles completed: {battles_completed}")
+        logger.info(f"Wins: {stats['wins']}")
+        logger.info(f"Losses: {stats['losses']}")
         
     except Exception as e:
         logger.error(f"Battle error: {e}")
@@ -258,11 +271,13 @@ if __name__ == "__main__":
                        help='Username to challenge (required for challenge mode)')
     parser.add_argument('--format', type=str, default='gen1ou',
                        help='Battle format (default: gen1ou)')
+    parser.add_argument('--battles', type=int, default=1,
+                       help='Number of battles to run (default: 1)')
     
     args = parser.parse_args()
     
     if args.mode == 'ladder':
-        asyncio.run(run_single_gen1ou_battle())
+        asyncio.run(run_single_gen1ou_battle(args.battles))
     elif args.mode == 'challenge':
         if not args.opponent:
             logger.error("Opponent username is required for challenge mode")
