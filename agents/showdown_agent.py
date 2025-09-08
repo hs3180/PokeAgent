@@ -33,6 +33,7 @@ class ShowdownAgent(BaseAgent):
                  server_url: str = None,
                  server_port: int = None,
                  battle_format: str = "gen8randombattle",
+                 team: Optional[str] = None,
                  log_level: int = logging.INFO,
                  load_dotenv_file: bool = True,
                  **kwargs):
@@ -45,6 +46,7 @@ class ShowdownAgent(BaseAgent):
             server_url: Showdown服务器地址（可选，可以从环境变量POKEAGENT_SERVER_URL读取）
             server_port: 服务器端口（可选，可以从环境变量POKEAGENT_SERVER_PORT读取）
             battle_format: 对战格式
+            team: 对战队伍（可选，可以是Showdown队伍格式或packed格式）
             log_level: 日志级别
             load_dotenv_file: 是否自动加载.env文件（默认为True）
         """
@@ -61,7 +63,7 @@ class ShowdownAgent(BaseAgent):
         username = username or os.environ.get('POKEAGENT_USERNAME')
         password = password or os.environ.get('POKEAGENT_PASSWORD')
         server_url = server_url or os.environ.get('POKEAGENT_SERVER_URL')
-        server_port = server_port or (int(os.environ.get('POKEAGENT_SERVER_PORT')) if os.environ.get('POKEAGENT_SERVER_PORT') else None)
+        server_port = server_port or (int(os.environ.get('POKEAGENT_SERVER_PORT').strip()) if os.environ.get('POKEAGENT_SERVER_PORT') and os.environ.get('POKEAGENT_SERVER_PORT').strip() else None)
         
         # 强制用户设置必要的认证信息
         if not username:
@@ -87,6 +89,7 @@ class ShowdownAgent(BaseAgent):
         
         self._log_level = log_level
         self._battle_format = battle_format
+        self._team = team
         self._username = username
         self._password = password
         self.server_url = server_url
@@ -98,6 +101,7 @@ class ShowdownAgent(BaseAgent):
             account_configuration=account_config,
             server_configuration=server_config,
             battle_format=battle_format,
+            team=team,
             log_level=log_level,
             **kwargs
         )
@@ -165,19 +169,26 @@ class ShowdownAgent(BaseAgent):
         await self.accept_challenge(format_to_use)
         logging.info(f"已接受 {format_to_use} 格式的挑战")
     
-    async def join_ladder(self, battle_format: Optional[str] = None):
+    async def join_ladder(self, battle_format: Optional[str] = None, n_games: int = 1):
         """
         加入天梯对战
         
         Args:
             battle_format: 对战格式（可选，默认使用初始化时的格式）
+            n_games: 要进行的对战数量（默认为1）
         """
         if not self.is_connected:
             raise RuntimeError("未连接到Showdown服务器")
         
         format_to_use = battle_format or self._battle_format
-        await self.ladder(format_to_use)
-        logging.info(f"已开始搜索 {format_to_use} 天梯对战")
+        # The ladder method expects the number of games, not the format
+        # The format is already set during initialization
+        try:
+            await self.ladder(n_games)
+            logging.info(f"已开始搜索 {format_to_use} 天梯对战，计划进行 {n_games} 场对战")
+        except Exception as e:
+            logging.error(f"加入天梯失败: {e}")
+            raise
     
     async def leave_ladder(self):
         """

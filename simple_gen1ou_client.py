@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Simplified Gen1 OU ladder battle client
-Connects to ladder for a single Gen1OU battle
+Simplified Gen1 OU battle client
+Supports ladder battles and challenging specific opponents
 """
 
 import asyncio
@@ -9,6 +9,7 @@ import logging
 import sys
 import time
 import os
+import argparse
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -16,6 +17,7 @@ from dotenv import load_dotenv
 sys.path.append(str(Path(__file__).parent))
 
 from agents.showdown_agent import ShowdownAgent
+from agents.llm_agent import LLMAgent
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -55,9 +57,56 @@ async def run_single_gen1ou_battle():
         logger.error("  export POKEAGENT_PASSWORD=your_password  # Optional")
         return
     
-    # Create Showdown Agent using environment variables
+    # Gen1 OU Team - User's competitive team
+    gen1ou_team = """
+Starmie
+Ability: Illuminate
+Bashful Nature
+- Recover
+- Psychic
+- Thunderbolt
+- Blizzard
+
+Chansey
+Ability: Natural Cure
+- Soft-Boiled
+- Thunder Wave
+- Ice Beam
+- Seismic Toss
+
+Rhydon
+Ability: Lightning Rod
+- Rock Slide
+- Earthquake
+- Substitute
+- Body Slam
+
+Snorlax
+Ability: Immunity
+- Body Slam
+- Surf
+- Hyper Beam
+- Self-Destruct
+
+Tauros
+Ability: Intimidate
+- Body Slam
+- Hyper Beam
+- Blizzard
+- Earthquake
+
+Exeggutor
+Ability: Chlorophyll
+- Sleep Powder
+- Stun Spore
+- Explosion
+- Psychic
+"""
+    
+    # Create Showdown Agent using environment variables with team
     agent = ShowdownAgent(
-        battle_format="gen1ou"
+        battle_format="gen1ou",
+        team=gen1ou_team
     )
     
     try:
@@ -110,6 +159,113 @@ async def run_single_gen1ou_battle():
             pass
         logger.info("=== Battle ended ===")
 
+
+async def challenge_opponent(opponent_username, battle_format="gen1ou"):
+    """
+    Challenge a specific opponent
+    """
+    logger.info(f"=== Challenging {opponent_username} ===")
+    logger.info(f"Battle format: {battle_format}")
+    
+    # Gen1 OU Team - User's competitive team
+    gen1ou_team = """
+Starmie
+Ability: Illuminate
+Bashful Nature
+- Recover
+- Psychic
+- Thunderbolt
+- Blizzard
+
+Chansey
+Ability: Natural Cure
+- Soft-Boiled
+- Thunder Wave
+- Ice Beam
+- Seismic Toss
+
+Rhydon
+Ability: Lightning Rod
+- Rock Slide
+- Earthquake
+- Substitute
+- Body Slam
+
+Snorlax
+Ability: Immunity
+- Body Slam
+- Surf
+- Hyper Beam
+- Self-Destruct
+
+Tauros
+Ability: Intimidate
+- Body Slam
+- Hyper Beam
+- Blizzard
+- Earthquake
+
+Exeggutor
+Ability: Chlorophyll
+- Sleep Powder
+- Stun Spore
+- Explosion
+- Psychic
+"""
+    
+    agent = ShowdownAgent(battle_format=battle_format, team=gen1ou_team)
+    
+    try:
+        # Connect to server
+        logger.info("Connecting to Showdown server...")
+        await agent.connect()
+        logger.info(f"Connected as {agent.username}")
+        
+        # Challenge the opponent
+        logger.info(f"Challenging {opponent_username}...")
+        await agent.challenge_user(opponent_username, battle_format)
+        
+        # Wait for battle to start
+        start_time = time.time()
+        while not agent.battles and (time.time() - start_time) < 30:
+            await asyncio.sleep(1)
+        
+        if not agent.battles:
+            logger.error(f"Failed to start battle with {opponent_username}")
+            return
+        
+        # Conduct battle
+        logger.info("Battle started!")
+        battle_id = list(agent.battles.keys())[0]
+        battle = agent.battles[battle_id]
+        
+        await battle.wait_until_finished()
+        
+        # Show result
+        result = "Victory" if battle.won else "Defeat"
+        logger.info(f"Battle finished: {result}")
+        
+    except Exception as e:
+        logger.error(f"Challenge error: {e}")
+    finally:
+        await agent.disconnect()
+
 if __name__ == "__main__":
-    # Run single Gen1OU ladder battle
-    asyncio.run(run_single_gen1ou_battle())
+    parser = argparse.ArgumentParser(description='Pokemon Showdown Battle Client')
+    parser.add_argument('--mode', choices=['ladder', 'challenge'], 
+                       default='ladder', help='Battle mode')
+    parser.add_argument('--opponent', type=str, 
+                       help='Username to challenge (required for challenge mode)')
+    parser.add_argument('--format', type=str, default='gen1ou',
+                       help='Battle format (default: gen1ou)')
+    
+    args = parser.parse_args()
+    
+    if args.mode == 'ladder':
+        asyncio.run(run_single_gen1ou_battle())
+    elif args.mode == 'challenge':
+        if not args.opponent:
+            logger.error("Opponent username is required for challenge mode")
+            logger.error("Usage: python simple_gen1ou_client.py --mode challenge --opponent <username>")
+            sys.exit(1)
+        asyncio.run(challenge_opponent(args.opponent, args.format))
