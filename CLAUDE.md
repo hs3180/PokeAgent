@@ -59,6 +59,30 @@ export POKEAGENT_PASSWORD=your_password
 pokeagent ladder --battles 1
 ```
 
+### Code Quality and Testing
+```bash
+# Run tests
+pytest
+
+# Run tests with coverage
+pytest --cov=pokeagent
+
+# Format code
+black pokeagent/
+
+# Sort imports
+isort pokeagent/
+
+# Lint code
+flake8 pokeagent/
+
+# Type checking
+mypy pokeagent/
+
+# Run all quality checks
+pytest && black pokeagent/ && isort pokeagent/ && flake8 pokeagent/ && mypy pokeagent/
+```
+
 ## Architecture Overview
 
 ### Core Architecture
