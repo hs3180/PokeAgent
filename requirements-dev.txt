@@ -1,0 +1,8 @@
+# Development dependencies
+-r requirements.txt
+pytest
+pytest-asyncio
+black
+isort
+flake8
+mypy

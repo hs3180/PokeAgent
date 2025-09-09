@@ -52,7 +52,7 @@ class ShowdownAgent(BaseAgent):
         """
         # 自动加载.env文件（如果存在）
         if load_dotenv_file:
-            env_file = Path(__file__).parent.parent / '.env'
+            env_file = Path(__file__).parent.parent.parent / '.env'
             if env_file.exists():
                 load_dotenv(env_file)
             else:
@@ -152,7 +152,7 @@ class ShowdownAgent(BaseAgent):
             raise RuntimeError("未连接到Showdown服务器")
         
         format_to_use = battle_format or self._battle_format
-        await self.challenge_user(opponent, format_to_use)
+        await super().challenge_user(opponent, format_to_use)
         logging.info(f"已向 {opponent} 发起 {format_to_use} 格式的挑战")
     
     async def accept_challenge(self, battle_format: Optional[str] = None):
@@ -166,7 +166,7 @@ class ShowdownAgent(BaseAgent):
             raise RuntimeError("未连接到Showdown服务器")
         
         format_to_use = battle_format or self._battle_format
-        await self.accept_challenge(format_to_use)
+        await super().accept_challenge(format_to_use)
         logging.info(f"已接受 {format_to_use} 格式的挑战")
     
     async def join_ladder(self, battle_format: Optional[str] = None, n_games: int = 1):

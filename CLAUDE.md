@@ -6,11 +6,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Running the Application
 ```bash
-# Run Gen1 OU battle client
-python simple_gen1ou_client.py
+# Install the package
+pip install .
 
-# Installation
-pip install -r requirements.txt
+# Or in development mode
+pip install -e .
+
+# Run Gen1 OU ladder battles
+pokeagent ladder --battles 1
+
+# Challenge a specific opponent
+pokeagent challenge --opponent username
+
+# For help
+pokeagent --help
 ```
 
 ### Environment Configuration
@@ -47,7 +56,7 @@ export POKEAGENT_USERNAME=your_username
 export POKEAGENT_SERVER_URL=play.pokemonshowdown.com
 export POKEAGENT_SERVER_PORT=443
 export POKEAGENT_PASSWORD=your_password
-python simple_gen1ou_client.py
+pokeagent ladder --battles 1
 ```
 
 ## Architecture Overview
@@ -92,9 +101,12 @@ All agents must implement `choose_move(battle)` method that returns:
 - Switch orders via `self.create_order(pokemon)`
 
 ### File Structure Conventions
-- `agents/`: Agent implementations
-- `config/`: JSON configuration files
-- `simple_gen1ou_client.py`: Main client application
+- `pokeagent/`: Main package directory
+- `pokeagent/agents/`: Agent implementations
+- `pokeagent/config/`: JSON configuration files
+- `pokeagent/cli.py`: CLI entry point
+- `pyproject.toml`: Project configuration and dependencies
+- `setup.py`: Installation script
 
 ### Common Patterns
 - Agents inherit from `BaseAgent` and implement `choose_move()`
