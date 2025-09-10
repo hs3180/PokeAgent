@@ -115,50 +115,21 @@ async def run_ladder_battles(num_battles: int = 1, battle_format: str = "gen1ou"
         await agent.connect()
         logger.info(f"Connected as {agent.username}")
         logger.info(f"Battle format: {battle_format}")
+        logger.info(f"Starting {num_battles} ladder battles...")
         
-        battles_completed = 0
-        while battles_completed < num_battles:
-            logger.info(f"Joining {battle_format} ladder for battle {battles_completed + 1}...")
-            await agent.join_ladder(battle_format)
-            
-            # Wait for opponent
-            start_time = asyncio.get_event_loop().time()
-            while not agent.battles and (asyncio.get_event_loop().time() - start_time) < 120:
-                await asyncio.sleep(1)
-            
-            if not agent.battles:
-                logger.error("No opponent found within 120 seconds")
-                break
-            
-            # Conduct battle
-            battle_id = list(agent.battles.keys())[0]
-            battle = agent.battles[battle_id]
-            
-            logger.info(f"Battle {battles_completed + 1} started!")
-            await battle.wait_until_finished()
-            
-            result = "Victory" if battle.won else "Defeat"
-            logger.info(f"Battle {battles_completed + 1} finished: {result}")
-            
-            battles_completed += 1
-            
-            if battles_completed < num_battles:
-                await asyncio.sleep(3)
+        # Use the proper ladder API
+        await agent.ladder(num_battles)
         
         # Show final stats
         stats = agent.get_battle_stats()
         logger.info("=== Final Stats ===")
-        logger.info(f"Battles completed: {battles_completed}")
+        logger.info(f"Battles completed: {stats['total_battles']}")
         logger.info(f"Wins: {stats['wins']}")
         logger.info(f"Losses: {stats['losses']}")
         
     except Exception as e:
         logger.error(f"Battle error: {e}")
     finally:
-        try:
-            await agent.leave_ladder()
-        except:
-            pass
         try:
             await agent.disconnect()
         except:
@@ -204,7 +175,10 @@ async def challenge_opponent(opponent_username: str, battle_format: str = "gen1o
         battle = agent.battles[battle_id]
         
         logger.info("Battle started!")
-        await battle.wait_until_finished()
+        
+        # Wait for battle to finish
+        while not battle.finished:
+            await asyncio.sleep(1)
         
         result = "Victory" if battle.won else "Defeat"
         logger.info(f"Battle finished: {result}")

@@ -199,49 +199,7 @@ class ShowdownAgent(BaseAgent):
         await self.send_message("/cancelsearch")
         logging.info("已取消天梯对战搜索")
     
-    async def run_battles(self, num_battles: int = 1, battle_format: Optional[str] = None):
-        """
-        运行指定数量的对战
         
-        Args:
-            num_battles: 对战数量
-            battle_format: 对战格式（可选，默认使用初始化时的格式）
-        """
-        if not self.is_connected:
-            raise RuntimeError("未连接到Showdown服务器")
-        
-        format_to_use = battle_format or self._battle_format
-        battles_completed = 0
-        
-        try:
-            while battles_completed < num_battles:
-                # 加入天梯等待对战
-                await self.join_ladder(format_to_use)
-                
-                # 等待对战开始
-                while not self.battles:
-                    await asyncio.sleep(1)
-                
-                # 处理所有对战
-                for battle in self.battles.values():
-                    if not battle.finished:
-                        await battle.wait_until_finished()
-                        battles_completed += 1
-                        logging.info(f"完成对战 {battles_completed}/{num_battles}")
-                        
-                        if battles_completed >= num_battles:
-                            break
-                
-                # 短暂等待避免过于频繁的请求
-                await asyncio.sleep(2)
-                
-        except Exception as e:
-            logging.error(f"运行对战时发生错误: {e}")
-            raise
-        finally:
-            # 离开天梯
-            await self.leave_ladder()
-    
     def get_battle_stats(self) -> Dict[str, Any]:
         """
         获取对战统计信息
