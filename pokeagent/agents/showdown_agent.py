@@ -30,8 +30,8 @@ class ShowdownAgent(BaseAgent):
     def __init__(self, 
                  username: str = None,
                  password: Optional[str] = None,
-                 server_url: str = None,
-                 server_port: int = None,
+                 websocket_url: str = None,
+                 auth_url: str = None,
                  battle_format: str = "gen8randombattle",
                  team: Optional[str] = None,
                  log_level: int = logging.INFO,
@@ -43,8 +43,8 @@ class ShowdownAgent(BaseAgent):
         Args:
             username: Showdown用户名（可选，可以从环境变量POKEAGENT_USERNAME读取）
             password: Showdown密码（可选，可以从环境变量POKEAGENT_PASSWORD读取）
-            server_url: Showdown服务器地址（可选，可以从环境变量POKEAGENT_SERVER_URL读取）
-            server_port: 服务器端口（可选，可以从环境变量POKEAGENT_SERVER_PORT读取）
+            websocket_url: 完整的WebSocket URL（可选，可以从环境变量POKEAGENT_WEBSOCKET_URL读取）
+            auth_url: 认证URL（可选，可以从环境变量POKEAGENT_AUTH_URL读取，如未提供则从websocket_url自动生成）
             battle_format: 对战格式
             team: 对战队伍（可选，可以是Showdown队伍格式或packed格式）
             log_level: 日志级别
@@ -62,38 +62,36 @@ class ShowdownAgent(BaseAgent):
         # 从环境变量读取配置，优先使用环境变量
         username = username or os.environ.get('POKEAGENT_USERNAME')
         password = password or os.environ.get('POKEAGENT_PASSWORD')
-        server_url = server_url or os.environ.get('POKEAGENT_SERVER_URL')
-        server_port = server_port or (int(os.environ.get('POKEAGENT_SERVER_PORT').strip()) if os.environ.get('POKEAGENT_SERVER_PORT') and os.environ.get('POKEAGENT_SERVER_PORT').strip() else None)
+        websocket_url = websocket_url or os.environ.get('POKEAGENT_WEBSOCKET_URL')
+        auth_url = auth_url or os.environ.get('POKEAGENT_AUTH_URL')
         
         # 强制用户设置必要的认证信息
         if not username:
             raise ValueError("Username is required. Set it as parameter or environment variable POKEAGENT_USERNAME")
         
-        if not server_url or not server_port:
-            raise ValueError("Server URL and port are required. Set them as parameters or environment variables POKEAGENT_SERVER_URL and POKEAGENT_SERVER_PORT")
+        if not websocket_url:
+            raise ValueError("WebSocket URL is required. Set it as parameter or environment variable POKEAGENT_WEBSOCKET_URL")
+        
+        # 如果没有提供auth_url，则从websocket_url自动生成
+        if not auth_url:
+            auth_url = websocket_url.replace("wss://", "https://").replace("/showdown/websocket", "/action.php?")
         
         # 创建账户配置
         account_config = AccountConfiguration(username, password)
         
-        # 对于官方Showdown服务器，使用ShowdownServerConfiguration
-        if server_url == "play.pokemonshowdown.com" and server_port == 443:
-            server_config = ShowdownServerConfiguration
-        else:
-            # 自定义服务器配置
-            websocket_url = f"wss://{server_url}:{server_port}/showdown/websocket"
-            auth_url = f"https://{server_url}:{server_port}"
-            server_config = ServerConfiguration(
-                websocket_url=websocket_url,
-                authentication_url=auth_url
-            )
+        # 创建服务器配置
+        server_config = ServerConfiguration(
+            websocket_url=websocket_url,
+            authentication_url=auth_url
+        )
         
         self._log_level = log_level
         self._battle_format = battle_format
         self._team = team
         self._username = username
         self._password = password
-        self.server_url = server_url
-        self.server_port = server_port
+        self.websocket_url = websocket_url
+        self.auth_url = auth_url
         self.is_connected = False
         
         # 使用配置初始化Player
@@ -125,7 +123,7 @@ class ShowdownAgent(BaseAgent):
         try:
             # Player会自动连接，只需要设置连接状态
             self.is_connected = True
-            logging.info(f"成功连接到Showdown服务器: {self.server_url}:{self.server_port}")
+            logging.info(f"成功连接到Showdown服务器: {self.websocket_url}")
             
         except Exception as e:
             logging.error(f"连接Showdown服务器失败: {e}")

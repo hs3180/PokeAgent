@@ -28,8 +28,8 @@ The application supports authentication and configuration through environment va
 
 #### Required Environment Variables
 - `POKEAGENT_USERNAME`: Your Pokemon Showdown username
-- `POKEAGENT_SERVER_URL`: Showdown server URL (e.g., `play.pokemonshowdown.com`)
-- `POKEAGENT_SERVER_PORT`: Showdown server port (e.g., `443`)
+- `POKEAGENT_WEBSOCKET_URL`: Complete WebSocket URL (e.g., `wss://play.pokemonshowdown.com/showdown/websocket`)
+- `POKEAGENT_AUTH_URL`: Authentication URL (optional, auto-generated from websocket_url if not provided)
 
 #### Optional Environment Variables
 - `POKEAGENT_PASSWORD`: Your Pokemon Showdown password (for registered accounts)
@@ -45,16 +45,16 @@ The application supports authentication and configuration through environment va
    ```
    POKEAGENT_USERNAME=your_username
    POKEAGENT_PASSWORD=your_password
-   POKEAGENT_SERVER_URL=play.pokemonshowdown.com
-   POKEAGENT_SERVER_PORT=443
+   POKEAGENT_WEBSOCKET_URL=wss://play.pokemonshowdown.com/showdown/websocket
+   POKEAGENT_AUTH_URL=https://play.pokemonshowdown.com/action.php?
    ```
 3. Run the application - it will automatically load the `.env` file
 
 #### Setting Environment Variables Directly
 ```bash
 export POKEAGENT_USERNAME=your_username
-export POKEAGENT_SERVER_URL=play.pokemonshowdown.com
-export POKEAGENT_SERVER_PORT=443
+export POKEAGENT_WEBSOCKET_URL=wss://play.pokemonshowdown.com/showdown/websocket
+export POKEAGENT_AUTH_URL=https://play.pokemonshowdown.com/action.php?
 export POKEAGENT_PASSWORD=your_password
 pokeagent ladder --battles 1
 ```

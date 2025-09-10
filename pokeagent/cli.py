@@ -31,7 +31,7 @@ def load_environment_variables():
 
 def validate_environment_variables() -> bool:
     """Validate required environment variables are set"""
-    required_vars = ['POKEAGENT_USERNAME', 'POKEAGENT_SERVER_URL']
+    required_vars = ['POKEAGENT_USERNAME', 'POKEAGENT_WEBSOCKET_URL']
     missing_vars = [var for var in required_vars if not os.environ.get(var)]
     
     if missing_vars:
@@ -40,7 +40,7 @@ def validate_environment_variables() -> bool:
             logger.error(f"  - {var}")
         logger.error("\nPlease set these environment variables:")
         logger.error("  export POKEAGENT_USERNAME=your_username")
-        logger.error("  export POKEAGENT_SERVER_URL=play.pokemonshowdown.com")
+        logger.error("  export POKEAGENT_WEBSOCKET_URL=wss://play.pokemonshowdown.com/showdown/websocket")
         logger.error("  export POKEAGENT_PASSWORD=your_password  # Optional")
         return False
     
@@ -107,8 +107,8 @@ async def run_ladder_battles(num_battles: int = 1, battle_format: str = "gen1ou"
         team=get_default_team(),
         username=os.environ.get('POKEAGENT_USERNAME'),
         password=os.environ.get('POKEAGENT_PASSWORD'),
-        server_url=os.environ.get('POKEAGENT_SERVER_URL'),
-        server_port=int(os.environ.get('POKEAGENT_SERVER_PORT', 443))
+        websocket_url=os.environ.get('POKEAGENT_WEBSOCKET_URL'),
+        auth_url=os.environ.get('POKEAGENT_AUTH_URL'),
     )
     
     try:
@@ -179,8 +179,8 @@ async def challenge_opponent(opponent_username: str, battle_format: str = "gen1o
         team=get_default_team(),
         username=os.environ.get('POKEAGENT_USERNAME'),
         password=os.environ.get('POKEAGENT_PASSWORD'),
-        server_url=os.environ.get('POKEAGENT_SERVER_URL'),
-        server_port=int(os.environ.get('POKEAGENT_SERVER_PORT', 443))
+        websocket_url=os.environ.get('POKEAGENT_WEBSOCKET_URL'),
+        auth_url=os.environ.get('POKEAGENT_AUTH_URL'),
     )
     
     try:
