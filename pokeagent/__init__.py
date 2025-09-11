@@ -9,7 +9,7 @@ from .agents import BaseAgent, LLMAgent, ShowdownAgent
 
 __all__ = [
     "BaseAgent",
-    "LLMAgent", 
+    "LLMAgent",
     "ShowdownAgent",
     "__version__",
 ]
