@@ -102,9 +102,9 @@ This is a Pokemon Showdown client designed for automated battles using AI agents
 - Handles authentication, connection management, and battle statistics
 
 #### Configuration System
-- JSON configuration in `config/showdown_config.json`
 - Environment variable support via `.env` files
 - Default team configuration for Gen1 OU format
+- Configuration via CLI parameters and environment variables
 
 ### Important Implementation Details
 
