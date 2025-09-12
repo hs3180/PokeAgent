@@ -30,6 +30,7 @@ dependencies = [
     "transformers==2.1.1",
     "numpy",
     "python-dotenv",
+    "huggingface-hub",
 ]
 
 [project.optional-dependencies]

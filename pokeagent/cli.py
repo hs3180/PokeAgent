@@ -14,8 +14,10 @@ from dotenv import load_dotenv
 
 from .agents.highest_damage_agent import HighestDamageAgent
 from .agents.llm_agent import LLMAgent
+from .agents.metamon_pretrain_agent import MetamonPretrainAgent
 from .agents.random_agent import RandomMoveAgent
 from .client.showdown_client import ShowdownClient
+from .model_downloader import download_model_command
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -32,6 +34,18 @@ def create_agent(agent_type: str, battle_format: str):
         return HighestDamageAgent(battle_format=battle_format)
     elif agent_type == "llm":
         return LLMAgent(battle_format=battle_format)
+    elif agent_type == "metamon" or agent_type == "smallrl":
+        return MetamonPretrainAgent(battle_format=battle_format, model_name="SmallRL")
+    elif agent_type == "smallil":
+        return MetamonPretrainAgent(battle_format=battle_format, model_name="SmallIL")
+    elif agent_type == "mediumrl":
+        return MetamonPretrainAgent(battle_format=battle_format, model_name="MediumRL")
+    elif agent_type == "mediumil":
+        return MetamonPretrainAgent(battle_format=battle_format, model_name="MediumIL")
+    elif agent_type == "largerl":
+        return MetamonPretrainAgent(battle_format=battle_format, model_name="LargeRL")
+    elif agent_type == "largeil":
+        return MetamonPretrainAgent(battle_format=battle_format, model_name="LargeIL")
     else:
         logger.warning(f"Unknown agent type: {agent_type}, using random")
         return RandomMoveAgent(battle_format=battle_format)
@@ -236,6 +250,12 @@ Examples:
   pokeagent ladder --battles 3 --agent highest_damage
   pokeagent challenge --opponent username --agent llm
   pokeagent ladder --format gen2ou --battles 3 --agent random
+  
+  # Download pretrained models
+  pokeagent download --list
+  pokeagent download --model smallrl
+  pokeagent download --all
+  pokeagent download --model mediumrl --force
         """,
     )
 
@@ -262,7 +282,7 @@ Examples:
         "-a",
         type=str,
         default="random",
-        choices=["random", "highest_damage", "llm"],
+        choices=["random", "highest_damage", "llm", "metamon", "smallrl", "smallil", "mediumrl", "mediumil", "largerl", "largeil"],
         help="Agent type to use (default: random)",
     )
 
@@ -283,8 +303,41 @@ Examples:
         "-a",
         type=str,
         default="random",
-        choices=["random", "highest_damage", "llm"],
+        choices=["random", "highest_damage", "llm", "metamon", "smallrl", "smallil", "mediumrl", "mediumil", "largerl", "largeil"],
         help="Agent type to use (default: random)",
+    )
+
+    # Download command
+    download_parser = subparsers.add_parser(
+        "download", help="Download pretrained models"
+    )
+    download_parser.add_argument(
+        "--model",
+        "-m",
+        type=str,
+        choices=["smallrl", "smallil", "mediumrl", "mediumil", "largerl", "largeil"],
+        help="Specific model to download",
+    )
+    download_parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Download all available models",
+    )
+    download_parser.add_argument(
+        "--force",
+        action="store_true", 
+        help="Overwrite existing models",
+    )
+    download_parser.add_argument(
+        "--list",
+        action="store_true",
+        help="List available models",
+    )
+    download_parser.add_argument(
+        "--models-dir",
+        type=str,
+        default="models",
+        help="Directory to save models (default: models)",
     )
 
     return parser
@@ -298,6 +351,11 @@ def main() -> None:
     if not args.command:
         parser.print_help()
         sys.exit(1)
+
+    # Download command doesn't need environment variables
+    if args.command == "download":
+        download_model_command(args)
+        return
 
     load_environment_variables()
 
