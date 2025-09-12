@@ -19,45 +19,45 @@ logger = logging.getLogger(__name__)
 PRETRAINED_MODELS = {
     "smallrl": {
         "name": "SmallRL",
-        "description": "15M parameter RL model",
+        "description": "15M parameter RL model (latest epoch 40)",
         "size": "15M",
         "repo_id": "jakegrigsby/metamon",
-        "filename": "SmallRL.pt"
+        "filename": "small-rl/ckpts/policy_weights/policy_epoch_40.pt"
     },
     "smallil": {
         "name": "SmallIL", 
-        "description": "15M parameter IL model",
+        "description": "15M parameter IL model (latest epoch 46)",
         "size": "15M",
         "repo_id": "jakegrigsby/metamon",
-        "filename": "SmallIL.pt"
+        "filename": "small-il/ckpts/policy_weights/policy_epoch_46.pt"
     },
     "mediumrl": {
         "name": "MediumRL",
-        "description": "50M parameter RL model", 
+        "description": "50M parameter RL model (latest epoch 40)", 
         "size": "50M",
         "repo_id": "jakegrigsby/metamon",
-        "filename": "MediumRL.pt"
+        "filename": "medium-rl/ckpts/policy_weights/policy_epoch_40.pt"
     },
     "mediumil": {
         "name": "MediumIL",
-        "description": "50M parameter IL model",
+        "description": "50M parameter IL model (latest epoch 96)",
         "size": "50M", 
         "repo_id": "jakegrigsby/metamon",
-        "filename": "MediumIL.pt"
+        "filename": "medium-il/ckpts/policy_weights/policy_epoch_96.pt"
     },
     "largerl": {
         "name": "LargeRL",
-        "description": "200M parameter RL model",
+        "description": "200M parameter RL model (latest epoch 50)",
         "size": "200M",
         "repo_id": "jakegrigsby/metamon",
-        "filename": "LargeRL.pt"
+        "filename": "large-rl/ckpts/policy_weights/policy_epoch_50.pt"
     },
     "largeil": {
         "name": "LargeIL",
-        "description": "200M parameter IL model",
+        "description": "200M parameter IL model (latest epoch 50)",
         "size": "200M",
         "repo_id": "jakegrigsby/metamon",
-        "filename": "LargeIL.pt"
+        "filename": "large-il/ckpts/policy_weights/policy_epoch_50.pt"
     }
 }
 
@@ -93,7 +93,9 @@ class ModelDownloader:
             return False
         
         model_info = PRETRAINED_MODELS[model_key]
-        target_path = self.models_dir / model_info["filename"]
+        # Create a clean filename from the model key
+        clean_filename = f"{model_info['name']}.pt"
+        target_path = self.models_dir / clean_filename
         
         # Check if model already exists
         if target_path.exists() and not force:
