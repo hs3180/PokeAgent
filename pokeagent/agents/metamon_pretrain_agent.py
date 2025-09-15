@@ -16,7 +16,7 @@ class MetamonPretrainAgent(BaseAgent):
 
     def __init__(
         self,
-        battle_format: str = "gen8randombattle",
+        battle_format: str = "gen1ou",
         model_path: Optional[str] = None,
         model_name: str = "SmallRL",
         **kwargs,

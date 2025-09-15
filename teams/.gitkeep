@@ -1,0 +1,2 @@
+# This file ensures the teams directory is included in git
+# but actual team files will be ignored
