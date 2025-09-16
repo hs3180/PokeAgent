@@ -5,7 +5,7 @@ Random Move Agent - Chooses moves randomly
 import logging
 import random
 
-from poke_env.battle import Battle
+from poke_env.environment import Battle
 
 from .base_agent import BaseAgent
 

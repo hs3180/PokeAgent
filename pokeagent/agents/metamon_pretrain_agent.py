@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from poke_env.environment import Battle
 
@@ -39,7 +39,10 @@ class MetamonPretrainAgent(BaseAgent):
 
             # 尝试加载其他组件（可选）
             try:
-                from metamon.interface import DefaultObservationSpace, DefaultActionSpace
+                from metamon.interface import (
+                    DefaultObservationSpace,
+                    DefaultActionSpace,
+                )
                 from metamon.env import get_metamon_teams
 
                 self.observation_space = DefaultObservationSpace()
@@ -53,15 +56,21 @@ class MetamonPretrainAgent(BaseAgent):
                 logging.warning("Using simplified mode without full Metamon interface")
 
             self._initialized = True
-            logging.info(f"Successfully initialized Metamon environment with {self.model_name}")
+            logging.info(
+                f"Successfully initialized Metamon environment with {self.model_name}"
+            )
 
         except ImportError as e:
             logging.error(f"Failed to import Metamon components: {e}")
-            logging.error("Please ensure Metamon is properly installed with: pip install -e ./metamon")
-            raise
+            logging.error(
+                "Please ensure Metamon is properly installed with: pip install -e ./metamon"
+            )
+            self.model = None
+            self._initialized = False
         except Exception as e:
             logging.error(f"Failed to setup Metamon environment: {e}")
-            raise
+            self.model = None
+            self._initialized = False
 
     def choose_move(self, battle: Battle):
         """
@@ -77,7 +86,9 @@ class MetamonPretrainAgent(BaseAgent):
         try:
             if self._has_full_interface:
                 # 使用完整Metamon接口
-                observation = self.observation_space.convert_battle_to_observation(battle)
+                observation = self.observation_space.convert_battle_to_observation(
+                    battle
+                )
                 action = self._select_action_with_model(observation, battle)
             else:
                 # 使用简化模式
@@ -91,23 +102,27 @@ class MetamonPretrainAgent(BaseAgent):
 
     def _select_action_with_model(self, observation, battle: Battle):
         """使用模型选择动作"""
+        if self.model is None:
+            return None
+
         try:
             # 根据模型类型选择合适的推理方法
-            if hasattr(self.model, 'act'):
+            if hasattr(self.model, "act"):
                 # RL模型的标准接口
                 action_logits = self.model.act(observation)
-                if hasattr(action_logits, 'sample'):
+                if hasattr(action_logits, "sample"):
                     # 如果是分布对象，采样
                     action_idx = action_logits.sample().item()
-                elif hasattr(action_logits, 'argmax'):
+                elif hasattr(action_logits, "argmax"):
                     # 如果是tensor，取最大值
                     action_idx = action_logits.argmax().item()
                 else:
                     # 直接使用
                     action_idx = int(action_logits)
-            elif hasattr(self.model, 'forward'):
+            elif hasattr(self.model, "forward"):
                 # 神经网络模型
                 import torch
+
                 with torch.no_grad():
                     action_logits = self.model(observation)
                     if isinstance(action_logits, torch.Tensor):
@@ -169,14 +184,15 @@ class MetamonPretrainAgent(BaseAgent):
             state = self._build_simplified_state(battle)
 
             # 使用模型预测动作
-            if hasattr(self.model, 'act'):
+            if hasattr(self.model, "act"):
                 action_logits = self.model.act(state)
-                if hasattr(action_logits, 'argmax'):
+                if hasattr(action_logits, "argmax"):
                     action_idx = action_logits.argmax().item()
                 else:
                     action_idx = int(action_logits)
-            elif hasattr(self.model, 'forward'):
+            elif hasattr(self.model, "forward"):
                 import torch
+
                 with torch.no_grad():
                     action_logits = self.model(state)
                     action_idx = torch.argmax(action_logits).item()
@@ -200,14 +216,21 @@ class MetamonPretrainAgent(BaseAgent):
 
         # 我方宝可梦状态
         if battle.active_pokemon:
-            state_features.append(battle.active_pokemon.current_hp / max(battle.active_pokemon.max_hp, 1))
-            state_features.append(len([m for m in battle.active_pokemon.moves if m.current_pp > 0]) / 4.0)
+            state_features.append(
+                battle.active_pokemon.current_hp / max(battle.active_pokemon.max_hp, 1)
+            )
+            state_features.append(
+                len([m for m in battle.active_pokemon.moves if m.current_pp > 0]) / 4.0
+            )
         else:
             state_features.extend([0.0, 0.0])
 
         # 对手宝可梦状态
         if battle.opponent_active_pokemon:
-            state_features.append(battle.opponent_active_pokemon.current_hp / max(battle.opponent_active_pokemon.max_hp, 1))
+            state_features.append(
+                battle.opponent_active_pokemon.current_hp
+                / max(battle.opponent_active_pokemon.max_hp, 1)
+            )
         else:
             state_features.append(0.0)
 
@@ -226,6 +249,7 @@ class MetamonPretrainAgent(BaseAgent):
             state_features.append(0.0)
 
         import torch
+
         return torch.tensor(state_features, dtype=torch.float32).unsqueeze(0)
 
     def _simplified_action_mapping(self, action_idx: int, battle: Battle):
@@ -256,12 +280,12 @@ class MetamonPretrainAgent(BaseAgent):
             "model_loaded": self.model is not None,
             "initialized": self._initialized,
             "battle_format": self._battle_format,
-            "has_full_interface": getattr(self, '_has_full_interface', False),
+            "has_full_interface": getattr(self, "_has_full_interface", False),
         }
 
-        if hasattr(self, 'observation_space'):
+        if hasattr(self, "observation_space"):
             info["observation_space"] = type(self.observation_space).__name__
-        if hasattr(self, 'action_space'):
+        if hasattr(self, "action_space"):
             info["action_space"] = type(self.action_space).__name__
 
         return info
@@ -269,11 +293,13 @@ class MetamonPretrainAgent(BaseAgent):
     def get_battle_state(self, battle: Battle) -> Dict[str, Any]:
         """获取战斗状态，包含模型特定信息"""
         state = super().get_battle_state(battle)
-        state.update({
-            "agent_type": "metamon_pretrain",
-            "model_name": self.model_name,
-            "model_loaded": self.model is not None,
-            "initialized": self._initialized,
-            "using_metamon_interface": True,
-        })
+        state.update(
+            {
+                "agent_type": "metamon_pretrain",
+                "model_name": self.model_name,
+                "model_loaded": self.model is not None,
+                "initialized": self._initialized,
+                "using_metamon_interface": True,
+            }
+        )
         return state

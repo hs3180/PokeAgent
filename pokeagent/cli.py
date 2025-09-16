@@ -8,7 +8,6 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Optional
 
 from dotenv import load_dotenv
 
@@ -146,10 +145,10 @@ async def run_ladder_battles(
     client = ShowdownClient(
         battle_format=battle_format,
         team=get_default_team(),
-        username=os.environ.get("POKEAGENT_USERNAME"),
+        username=os.environ.get("POKEAGENT_USERNAME", ""),
         password=os.environ.get("POKEAGENT_PASSWORD"),
-        websocket_url=os.environ.get("POKEAGENT_WEBSOCKET_URL"),
-        auth_url=os.environ.get("POKEAGENT_AUTH_URL"),
+        websocket_url=os.environ.get("POKEAGENT_WEBSOCKET_URL", ""),
+        auth_url=os.environ.get("POKEAGENT_AUTH_URL", ""),
     )
     client.set_agent(agent)
 
@@ -174,7 +173,7 @@ async def run_ladder_battles(
     finally:
         try:
             await client.disconnect()
-        except:
+        except Exception:
             pass
         logger.info("=== Battle ended ===")
 
@@ -197,10 +196,10 @@ async def challenge_opponent(
     client = ShowdownClient(
         battle_format=battle_format,
         team=get_default_team(),
-        username=os.environ.get("POKEAGENT_USERNAME"),
+        username=os.environ.get("POKEAGENT_USERNAME", ""),
         password=os.environ.get("POKEAGENT_PASSWORD"),
-        websocket_url=os.environ.get("POKEAGENT_WEBSOCKET_URL"),
-        auth_url=os.environ.get("POKEAGENT_AUTH_URL"),
+        websocket_url=os.environ.get("POKEAGENT_WEBSOCKET_URL", ""),
+        auth_url=os.environ.get("POKEAGENT_AUTH_URL", ""),
     )
     client.set_agent(agent)
 
@@ -282,7 +281,18 @@ Examples:
         "-a",
         type=str,
         default="random",
-        choices=["random", "highest_damage", "llm", "metamon", "smallrl", "smallil", "mediumrl", "mediumil", "largerl", "largeil"],
+        choices=[
+            "random",
+            "highest_damage",
+            "llm",
+            "metamon",
+            "smallrl",
+            "smallil",
+            "mediumrl",
+            "mediumil",
+            "largerl",
+            "largeil",
+        ],
         help="Agent type to use (default: random)",
     )
 
@@ -303,7 +313,18 @@ Examples:
         "-a",
         type=str,
         default="random",
-        choices=["random", "highest_damage", "llm", "metamon", "smallrl", "smallil", "mediumrl", "mediumil", "largerl", "largeil"],
+        choices=[
+            "random",
+            "highest_damage",
+            "llm",
+            "metamon",
+            "smallrl",
+            "smallil",
+            "mediumrl",
+            "mediumil",
+            "largerl",
+            "largeil",
+        ],
         help="Agent type to use (default: random)",
     )
 
@@ -325,7 +346,7 @@ Examples:
     )
     download_parser.add_argument(
         "--force",
-        action="store_true", 
+        action="store_true",
         help="Overwrite existing models",
     )
     download_parser.add_argument(

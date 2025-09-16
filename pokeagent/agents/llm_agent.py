@@ -1,10 +1,9 @@
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 import torch
-from poke_env.battle import Battle
-from poke_env.player import Player
+from poke_env.environment import Battle
 from transformers import AutoModelWithLMHead, AutoTokenizer
 
 from .base_agent import BaseAgent
@@ -102,7 +101,7 @@ class LLMAgent(BaseAgent):
         battle_state = self.get_battle_state(battle)
 
         prompt = f"{self.system_prompt}\n\n"
-        prompt += f"当前战斗状态：\n"
+        prompt += "当前战斗状态：\n"
         prompt += f"- 回合: {battle_state['turn']}\n"
         prompt += f"- 我方宝可梦: {battle_state['active_pokemon']}\n"
         prompt += f"- 对手宝可梦: {battle_state['opponent_active_pokemon']}\n"
@@ -113,7 +112,7 @@ class LLMAgent(BaseAgent):
 
         # 添加宝可梦详细信息
         if battle.active_pokemon:
-            prompt += f"我方宝可梦详情:\n"
+            prompt += "我方宝可梦详情:\n"
             prompt += f"- 物种: {battle.active_pokemon.species}\n"
             if hasattr(battle.active_pokemon, "current_hp"):
                 prompt += f"- 当前HP: {battle.active_pokemon.current_hp}\n"
@@ -122,7 +121,7 @@ class LLMAgent(BaseAgent):
             prompt += f"- 状态: {battle.active_pokemon.status}\n"
 
         if battle.opponent_active_pokemon:
-            prompt += f"对手宝可梦详情:\n"
+            prompt += "对手宝可梦详情:\n"
             prompt += f"- 物种: {battle.opponent_active_pokemon.species}\n"
             if hasattr(battle.opponent_active_pokemon, "current_hp"):
                 prompt += f"- 当前HP: {battle.opponent_active_pokemon.current_hp}\n"
@@ -138,6 +137,10 @@ class LLMAgent(BaseAgent):
         """
         使用LLM生成回复
         """
+        if self.tokenizer is None or self.model is None:
+            # Fallback to random move if model is not available
+            return "random"
+
         inputs = self.tokenizer.encode(
             prompt, return_tensors="pt", truncation=True, max_length=512
         )

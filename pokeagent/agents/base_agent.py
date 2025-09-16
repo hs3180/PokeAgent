@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
 import random
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
-from poke_env.battle import Battle
+from poke_env.environment import Battle
 from poke_env.data import GenData
 from poke_env.player import Player
 
@@ -29,10 +29,7 @@ class BaseAgent(Player):
     def initialize_player(self, **kwargs):
         """Initialize the Player with proper configuration"""
         if not self._initialized:
-            super().__init__(
-                log_level=self._log_level,
-                **kwargs
-            )
+            super().__init__(log_level=self._log_level, **kwargs)
             self._initialized = True
 
     def choose_move(self, battle: Battle):
@@ -81,16 +78,11 @@ class BaseAgent(Player):
             "lost": battle.lost,
         }
 
-    def choose_random_move(self, battle: Battle):
+    def choose_random_move(self, battle: Battle) -> str:
         """
         Randomly choose move (as fallback)
         """
-        if battle.available_moves:
-            return self.create_order(random.choice(battle.available_moves))
-        elif battle.available_switches:
-            return self.create_order(random.choice(battle.available_switches))
-        else:
-            return self.choose_random_move(battle)
+        return super().choose_random_move(battle)
 
     def is_battle_finished(self, battle: Battle) -> bool:
         """
@@ -117,3 +109,18 @@ class BaseAgent(Player):
             return 1.0
         else:
             return my_remaining / (my_remaining + opponent_remaining)
+
+    async def challenge_user(self, opponent: str, battle_format: str):
+        """Challenge a specific user"""
+        # This will be implemented by the ShowdownClient
+        pass
+
+    async def accept_challenge(self, battle_format: str):
+        """Accept a challenge"""
+        # This will be implemented by the ShowdownClient
+        pass
+
+    async def send_message(self, message: str):
+        """Send message to server"""
+        # This will be implemented by the ShowdownClient
+        pass

@@ -2,15 +2,12 @@
 Showdown Client - Handles communication with Pokemon Showdown servers
 """
 
-import asyncio
 import logging
 import os
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
-from poke_env.battle import Battle
-from poke_env.player import Player
 from poke_env.ps_client.account_configuration import AccountConfiguration
 from poke_env.ps_client.server_configuration import ServerConfiguration
 
@@ -24,10 +21,10 @@ class ShowdownClient:
 
     def __init__(
         self,
-        username: str = None,
+        username: str = "",
         password: Optional[str] = None,
-        websocket_url: str = None,
-        auth_url: str = None,
+        websocket_url: str = "",
+        auth_url: str = "",
         battle_format: str = "gen1ou",
         team: Optional[str] = None,
         log_level: int = logging.INFO,

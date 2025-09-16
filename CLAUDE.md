@@ -53,20 +53,15 @@ source metamon_venv/bin/activate
 # Run tests
 pytest --cov=pokeagent
 
-# Format code
-black pokeagent/
-
-# Sort imports
-isort pokeagent/
-
-# Lint code
-flake8 pokeagent/
+# Format and lint code
+ruff check pokeagent/
+ruff format pokeagent/
 
 # Type checking
-mypy pokeagent/
+pyright pokeagent/
 
 # Run all checks
-pytest && black pokeagent/ && isort pokeagent/ && flake8 pokeagent/ && mypy pokeagent/
+pytest && ruff check pokeagent/ && ruff format pokeagent/ && pyright pokeagent/
 ```
 
 ## Architecture
@@ -78,6 +73,7 @@ pytest && black pokeagent/ && isort pokeagent/ && flake8 pokeagent/ && mypy poke
 - `LLMAgent`: Uses transformers models
 - `RandomMoveAgent`: Random move selection
 - `HighestDamageAgent`: Damage optimization
+- `MetamonPretrainAgent`: Pretrained models from HuggingFace
 
 #### Client Architecture
 - `ShowdownClient`: Server connection management

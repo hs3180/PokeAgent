@@ -3,9 +3,8 @@ Highest Damage Agent - Chooses moves with highest expected damage
 """
 
 import logging
-from typing import List, Optional, Tuple
 
-from poke_env.battle import Battle
+from poke_env.environment import Battle
 
 from .base_agent import BaseAgent
 
@@ -232,7 +231,6 @@ class HighestDamageAgent(BaseAgent):
                 "bug": 2.0,
                 "fighting": 2.0,
                 "ground": 0.5,
-                "fighting": 0.5,
             },
             "ghost": {"psychic": 2.0, "ghost": 2.0, "dark": 0.5, "normal": 0.0},
             "dragon": {"dragon": 2.0},
