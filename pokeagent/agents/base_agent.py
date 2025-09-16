@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-import random
 from typing import Any, Dict, List
 
 from poke_env.environment import Battle
@@ -77,12 +76,6 @@ class BaseAgent(Player):
             "won": battle.won,
             "lost": battle.lost,
         }
-
-    def choose_random_move(self, battle: Battle) -> str:
-        """
-        Randomly choose move (as fallback)
-        """
-        return super().choose_random_move(battle)
 
     def is_battle_finished(self, battle: Battle) -> bool:
         """
