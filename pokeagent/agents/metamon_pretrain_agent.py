@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict
 
-from poke_env.environment import Battle
+from poke_env.environment.battle import Battle
 
 from .base_agent import BaseAgent
 

@@ -2,7 +2,7 @@
 import logging
 from typing import Any, Dict, List
 
-from poke_env.environment import Battle
+from poke_env.environment.battle import Battle
 from poke_env.data import GenData
 from poke_env.player import Player
 

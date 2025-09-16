@@ -1,0 +1,18 @@
+{
+  "include": ["pokeagent"],
+  "extraPaths": ["metamon_venv/lib/python*/site-packages"],
+  "pythonVersion": "3.8",
+  "typeCheckingMode": "basic",
+  "reportMissingImports": false,
+  "reportMissingTypeStubs": false,
+  "reportUnknownArgumentType": false,
+  "reportUnknownLambdaType": false,
+  "reportUnknownMemberType": false,
+  "reportUnknownParameterType": false,
+  "reportUnknownVariableType": false,
+  "reportUntypedFunctionDecorator": false,
+  "reportUntypedClassDecorator": false,
+  "reportUntypedNamedTuple": false,
+  "reportOptionalMemberAccess": false,
+  "reportOptionalCall": false
+}

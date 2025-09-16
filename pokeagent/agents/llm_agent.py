@@ -3,7 +3,7 @@ import logging
 from typing import Any, Dict
 
 import torch
-from poke_env.environment import Battle
+from poke_env.environment.battle import Battle
 from transformers import AutoModelWithLMHead, AutoTokenizer
 
 from .base_agent import BaseAgent

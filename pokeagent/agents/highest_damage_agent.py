@@ -4,7 +4,7 @@ Highest Damage Agent - Chooses moves with highest expected damage
 
 import logging
 
-from poke_env.environment import Battle
+from poke_env.environment.battle import Battle
 
 from .base_agent import BaseAgent
 
