@@ -72,11 +72,11 @@ class LLMAgent(BaseAgent):
         使用LLM选择移动
         """
         if battle.finished:
-            return None
+            raise RuntimeError("Battle is already finished")
 
-        # 如果模型未加载，使用随机策略
+        # 如果模型未加载，抛出错误
         if self.model is None or self.tokenizer is None:
-            return self.choose_random_move(battle)
+            raise RuntimeError("LLM model not loaded")
 
         try:
             # 构建提示词
@@ -92,7 +92,7 @@ class LLMAgent(BaseAgent):
 
         except Exception as e:
             logging.error(f"LLM选择移动时出错: {e}")
-            return self.choose_random_move(battle)
+            raise RuntimeError(f"LLM action selection failed: {e}")
 
     def _build_prompt(self, battle: Battle) -> str:
         """
@@ -210,8 +210,8 @@ class LLMAgent(BaseAgent):
         except Exception as e:
             logging.error(f"解析LLM回复时出错: {e}")
 
-        # 如果解析失败，使用随机策略
-        return self.choose_random_move(battle)
+        # 如果解析失败，抛出错误
+        raise RuntimeError("Failed to parse LLM response")
 
     def update_model(self, model_name: str):
         """

@@ -26,8 +26,7 @@ class HighestDamageAgent(BaseAgent):
         Choose the move with highest expected damage
         """
         if not battle.active_pokemon:
-            logger.warning("No active pokemon")
-            return None
+            raise RuntimeError("No active pokemon")
 
         # Get all possible actions and their scores
         actions = []
@@ -45,8 +44,7 @@ class HighestDamageAgent(BaseAgent):
                 actions.append((pokemon, "switch", switch_score))
 
         if not actions:
-            logger.warning("No available actions")
-            return None
+            raise RuntimeError("No available actions")
 
         # Sort by score (descending) and choose the best
         actions.sort(key=lambda x: x[2], reverse=True)

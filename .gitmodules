@@ -1,3 +1,6 @@
 [submodule "metamon"]
 	path = metamon
 	url = https://github.com/UT-Austin-RPL/metamon.git
+[submodule "amago"]
+	path = amago
+	url = https://github.com/UT-Austin-RPL/amago.git

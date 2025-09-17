@@ -22,6 +22,7 @@ class MetamonPretrainAgent(BaseAgent):
         self.model_name = model_name
         self.model = None
         self._initialized = False
+        self._has_full_interface = False
 
         # 初始化Metamon环境
         self._setup_metamon_environment()
@@ -36,6 +37,10 @@ class MetamonPretrainAgent(BaseAgent):
             self.model = load_pretrained_agent(self.model_name)
             if self.model is None:
                 raise ValueError(f"Could not load pretrained model: {self.model_name}")
+
+            # 验证模型是否可调用
+            if not hasattr(self.model, '__call__'):
+                raise ValueError(f"Loaded model is not callable: {self.model_name}")
 
             # 尝试加载其他组件（可选）
             try:
@@ -77,11 +82,13 @@ class MetamonPretrainAgent(BaseAgent):
         使用Metamon预训练模型选择移动
         """
         if battle.finished:
-            return None
+            raise RuntimeError("Battle is already finished")
 
         if not self._initialized:
-            logging.error("Metamon environment not properly initialized")
-            return self.choose_random_move(battle)
+            raise RuntimeError("Metamon environment not properly initialized")
+
+        if self.model is None:
+            raise RuntimeError("Metamon model not loaded - please check installation and model availability")
 
         try:
             if self._has_full_interface:
@@ -98,12 +105,12 @@ class MetamonPretrainAgent(BaseAgent):
 
         except Exception as e:
             logging.error(f"Error in Metamon agent: {e}")
-            return self.choose_random_move(battle)
+            raise
 
     def _select_action_with_model(self, observation, battle: Battle):
         """使用模型选择动作"""
         if self.model is None:
-            return None
+            raise RuntimeError("Model is None - cannot select action")
 
         try:
             # 根据模型类型选择合适的推理方法
@@ -138,7 +145,7 @@ class MetamonPretrainAgent(BaseAgent):
 
         except Exception as e:
             logging.error(f"Error in model inference: {e}")
-            return self.choose_random_move(battle)
+            raise RuntimeError(f"Model inference failed: {e}")
 
     def _convert_action_to_order(self, action_idx: int, battle: Battle):
         """将动作索引转换为poke-env订单"""
@@ -170,18 +177,22 @@ class MetamonPretrainAgent(BaseAgent):
                 elif available_switches:
                     return self.create_order(available_switches[0])
 
-            # 如果没有可用动作，使用随机策略
-            return self.choose_random_move(battle)
+            # 如果没有可用动作，抛出错误
+            raise RuntimeError("No available actions")
 
         except Exception as e:
             logging.error(f"Error converting action to order: {e}")
-            return self.choose_random_move(battle)
+            raise RuntimeError(f"Action conversion failed: {e}")
 
     def _select_action_simplified(self, battle: Battle):
         """简化模式下的动作选择"""
         try:
             # 构建简化的状态表示
             state = self._build_simplified_state(battle)
+
+            # 验证模型是否存在
+            if self.model is None:
+                raise RuntimeError("Model is None - cannot select action")
 
             # 使用模型预测动作
             if hasattr(self.model, "act"):
@@ -204,7 +215,7 @@ class MetamonPretrainAgent(BaseAgent):
 
         except Exception as e:
             logging.error(f"Error in simplified action selection: {e}")
-            return self.choose_random_move(battle)
+            raise RuntimeError(f"Simplified action selection failed: {e}")
 
     def _build_simplified_state(self, battle: Battle):
         """构建简化的状态表示"""
@@ -259,7 +270,7 @@ class MetamonPretrainAgent(BaseAgent):
 
         total_actions = len(available_moves) + len(available_switches)
         if total_actions == 0:
-            return self.choose_random_move(battle)
+            raise RuntimeError("No available actions")
 
         # 确保动作索引在有效范围内
         action_idx = abs(action_idx) % total_actions
@@ -271,7 +282,7 @@ class MetamonPretrainAgent(BaseAgent):
             if switch_idx < len(available_switches):
                 return self.create_order(available_switches[switch_idx])
 
-        return self.choose_random_move(battle)
+        raise RuntimeError("No valid action found")
 
     def get_model_info(self) -> Dict[str, Any]:
         """获取模型信息"""

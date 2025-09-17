@@ -39,8 +39,8 @@ class RandomMoveAgent(BaseAgent):
             )
 
         if not available_moves:
-            logger.warning("No available moves or switches")
-            return None
+            logger.warning("No available moves or switches, using built-in random move selection")
+            return super().choose_random_singles_move(battle)
 
         # Choose randomly
         choice, choice_type = random.choice(available_moves)
